@@ -77,77 +77,108 @@ class Command(BaseCommand):
         completed = 0
         failed = 0
 
-        for post in posts:
-            try:
-                print(f"\nProcessing post: {post.title}")
+        # Group posts by account for better organization
+        from collections import defaultdict
+        posts_by_account = defaultdict(list)
+        for post in posts.select_related('account'):
+            posts_by_account[post.account].append(post)
 
-                # Update job status
-                posting_job.current_post_id = post.id
-                posting_job.current_post_title = post.title
-                posting_job.save()
+        total_accounts = len(posts_by_account)
+        current_account_num = 0
 
-                # Update post status to 'posting'
-                post.status = 'posting'
-                post.save()
+        print(f"\n{'='*60}")
+        print(f"Starting posting process for {total_accounts} account(s)")
+        print(f"{'='*60}\n")
 
-                # Get the absolute path of the image
-                image_path = os.path.abspath(post.image.path)
-                print(f"Image path: {image_path}")
+        # Process posts grouped by account
+        for account, account_posts in posts_by_account.items():
+            current_account_num += 1
+            account_posts_count = len(account_posts)
 
-                # Post to Facebook
-                login_and_post(
-                    email=post.account.email,
-                    title=post.title,
-                    description=post.description,
-                    price=float(post.price),
-                    image_path=image_path
-                )
+            print(f"\n{'='*60}")
+            print(
+                f"📧 ACCOUNT {current_account_num}/{total_accounts}: {account.email}")
+            print(f"{'='*60}")
+            print(f"Posting initiated for account: {account.email}")
+            print(f"Posts to publish: {account_posts_count}")
+            print(f"{'='*60}\n")
 
-                # Mark as posted
-                post.posted = True
-                post.status = 'posted'
-                post.save()
+            account_completed = 0
+            account_failed = 0
 
-                completed += 1
-                posting_job.completed_posts = completed
-                posting_job.save()
+            for post in account_posts:
+                try:
+                    print(f"\nProcessing post: {post.title}")
 
-                print(
-                    f'✓ Successfully posted "{post.title}" to {post.account.email}')
+                    # Update job status
+                    posting_job.current_post_id = post.id
+                    posting_job.current_post_title = post.title
+                    posting_job.save()
 
-            except Exception as e:
-                print(
-                    f'✗ Failed to post "{post.title}" to {post.account.email}: {str(e)}')
+                    # Get the absolute path of the image
+                    image_path = os.path.abspath(post.image.path)
+                    print(f"Image path: {image_path}")
 
-                # Update post status
-                post.status = 'failed'
-                post.error_message = str(e)
-                post.retry_count += 1
-                post.save()
+                    # Post to Facebook
+                    login_and_post(
+                        email=post.account.email,
+                        title=post.title,
+                        description=post.description,
+                        price=float(post.price),
+                        image_path=image_path
+                    )
 
-                # Determine error type
-                error_type = 'unknown'
-                error_str = str(e).lower()
-                if 'session' in error_str or 'cookie' in error_str or 'login' in error_str:
-                    error_type = 'session_expired'
-                elif 'network' in error_str or 'connection' in error_str:
-                    error_type = 'network_error'
-                elif 'captcha' in error_str:
-                    error_type = 'captcha'
-                elif 'rate' in error_str or 'limit' in error_str:
-                    error_type = 'rate_limit'
+                    # Mark as posted
+                    post.posted = True
+                    post.save()
 
-                # Log detailed error
-                ErrorLog.objects.create(
-                    post=post,
-                    error_type=error_type,
-                    error_message=str(e),
-                    stack_trace=traceback.format_exc()
-                )
+                    completed += 1
+                    account_completed += 1
+                    posting_job.completed_posts = completed
+                    posting_job.save()
 
-                failed += 1
-                posting_job.failed_posts = failed
-                posting_job.save()
+                    print(
+                        f'✓ Successfully posted "{post.title}" to {post.account.email}')
+
+                except Exception as e:
+                    print(
+                        f'✗ Failed to post "{post.title}" to {post.account.email}: {str(e)}')
+
+                    # Update post status
+                    post.posted = False
+                    post.save()
+
+                    # Determine error type
+                    error_type = 'unknown'
+                    error_str = str(e).lower()
+                    if 'session' in error_str or 'cookie' in error_str or 'login' in error_str:
+                        error_type = 'session_expired'
+                    elif 'network' in error_str or 'connection' in error_str:
+                        error_type = 'network_error'
+                    elif 'captcha' in error_str:
+                        error_type = 'captcha'
+                    elif 'rate' in error_str or 'limit' in error_str:
+                        error_type = 'rate_limit'
+
+                    # Log detailed error
+                    ErrorLog.objects.create(
+                        post=post,
+                        error_type=error_type,
+                        error_message=str(e),
+                        stack_trace=traceback.format_exc()
+                    )
+
+                    failed += 1
+                    account_failed += 1
+                    posting_job.failed_posts = failed
+                    posting_job.save()
+
+            # Print account completion summary
+            print(f"\n{'='*60}")
+            print(f"✅ Posting completed for account: {account.email}")
+            print(
+                f"Account Summary: {account_completed} successful, {account_failed} failed")
+            print(f"{'='*60}\n")
 
         # Mark job as complete
         posting_job.status = 'completed' if failed == 0 else 'failed'
@@ -155,9 +186,12 @@ class Command(BaseCommand):
         posting_job.error_message = f"{failed} posts failed" if failed > 0 else None
         posting_job.save()
 
-        print(f"\n{'='*50}")
-        print(f"Posting completed!")
-        print(
-            f"Total: {total_posts} | Successful: {completed} | Failed: {failed}")
+        print(f"\n{'='*60}")
+        print(f"🎉 ALL POSTING COMPLETED!")
+        print(f"{'='*60}")
+        print(f"Total Accounts Processed: {total_accounts}")
+        print(f"Total Posts: {total_posts}")
+        print(f"✅ Successful: {completed}")
+        print(f"❌ Failed: {failed}")
         print(f"Job ID: {job_id}")
-        print(f"{'='*50}\n")
+        print(f"{'='*60}\n")

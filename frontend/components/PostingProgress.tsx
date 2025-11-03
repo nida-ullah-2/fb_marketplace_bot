@@ -17,50 +17,111 @@ export default function PostingProgress({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Server-Sent Events (SSE) connection for real-time updates
-    const eventSource = new EventSource(
-      `http://localhost:8000/api/posts/status-stream/${jobId}/`
-    );
+    let eventSource: EventSource | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
+    let usePolling = false;
 
-    eventSource.onopen = () => {
-      console.log("✅ SSE connection established");
-      setIsConnected(true);
-      setError(null);
-    };
+    // Try SSE first, fallback to polling if it fails
+    try {
+      // Server-Sent Events (SSE) connection for real-time updates
+      eventSource = new EventSource(
+        `http://localhost:8000/api/posts/status-stream/${jobId}/`
+      );
 
-    eventSource.onmessage = (event) => {
-      try {
-        const data: PostingJob = JSON.parse(event.data);
-        console.log("📊 Progress update:", data);
-        setJob(data);
+      eventSource.onopen = () => {
+        console.log("✅ SSE connection established");
+        setIsConnected(true);
+        setError(null);
+        usePolling = false;
+      };
 
-        // Close connection when job is complete or failed
-        if (data.status === "completed" || data.status === "failed") {
-          console.log("🏁 Job finished, closing SSE connection");
-          eventSource.close();
-          setIsConnected(false);
+      eventSource.onmessage = (event) => {
+        try {
+          const data: PostingJob = JSON.parse(event.data);
+          console.log("📊 Progress update:", data);
+          setJob(data);
 
-          // Call onComplete callback after 2 seconds
-          setTimeout(() => {
-            onComplete?.();
-          }, 2000);
+          // Close connection when job is complete or failed
+          if (data.status === "completed" || data.status === "failed") {
+            console.log("🏁 Job finished, closing SSE connection");
+            eventSource?.close();
+            setIsConnected(false);
+
+            // Call onComplete callback after 2 seconds
+            setTimeout(() => {
+              onComplete?.();
+            }, 2000);
+          }
+        } catch (err) {
+          console.error("❌ Failed to parse SSE data:", err);
         }
-      } catch (err) {
-        console.error("❌ Failed to parse SSE data:", err);
-      }
-    };
+      };
 
-    eventSource.onerror = (err) => {
-      console.error("❌ SSE connection error:", err);
-      setError("Connection lost. Please refresh.");
-      setIsConnected(false);
-      eventSource.close();
-    };
+      eventSource.onerror = (err) => {
+        console.warn("⚠️ SSE not available, falling back to polling");
+        setIsConnected(false);
+        eventSource?.close();
+        usePolling = true;
+
+        // Start polling as fallback
+        startPolling();
+      };
+    } catch (err) {
+      console.warn("⚠️ SSE not supported, using polling");
+      startPolling();
+    }
+
+    // Fallback polling mechanism
+    function startPolling() {
+      const poll = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await fetch(
+            `http://localhost:8000/api/posts/job-status/${jobId}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            const data: PostingJob = await response.json();
+            console.log("📊 Polling update:", data);
+            setJob(data);
+            setIsConnected(true);
+
+            // Stop polling when job is complete
+            if (data.status === "completed" || data.status === "failed") {
+              console.log("🏁 Job finished, stopping polling");
+              if (pollInterval) clearInterval(pollInterval);
+
+              setTimeout(() => {
+                onComplete?.();
+              }, 2000);
+            }
+          }
+        } catch (err) {
+          console.error("❌ Polling error:", err);
+        }
+      };
+
+      // Initial poll
+      poll();
+
+      // Poll every 2 seconds
+      pollInterval = setInterval(poll, 2000);
+    }
 
     // Cleanup on unmount
     return () => {
-      console.log("🧹 Cleaning up SSE connection");
-      eventSource.close();
+      console.log("🧹 Cleaning up connection");
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
     };
   }, [jobId, onComplete]);
 

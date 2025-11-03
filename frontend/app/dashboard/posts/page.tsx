@@ -287,6 +287,18 @@ export default function PostsPage() {
     }
 
     const count = postsToPost.length;
+
+    // Get the posts that will be posted to extract account info
+    const postsToPostData = posts.filter((p) => postsToPost.includes(p.id));
+
+    // Extract unique accounts
+    const uniqueAccounts = new Set(
+      postsToPostData
+        .map((p) => (typeof p.account === "object" ? p.account.email : ""))
+        .filter((email) => email !== "")
+    );
+    const accountsList = Array.from(uniqueAccounts);
+
     const message =
       selectedPosts.length > 0
         ? `Start posting ${count} selected post(s) to Facebook Marketplace?`
@@ -300,11 +312,16 @@ export default function PostsPage() {
       confirmText: "Start Posting",
       onConfirm: async () => {
         try {
-          // Log the start of posting
+          // Log the start of posting with account details
+          const accountsText =
+            accountsList.length === 1
+              ? `account: ${accountsList[0]}`
+              : `${accountsList.length} accounts: ${accountsList.join(", ")}`;
+
           addActivityLog(
             "post",
             "Posting initiated",
-            `Starting to post ${count} item(s) to Facebook Marketplace...`
+            `Starting to post ${count} item(s) using ${accountsText}`
           );
 
           const response = await postsAPI.startPosting(postsToPost);
@@ -651,10 +668,7 @@ export default function PostsPage() {
                             <h4 className="font-semibold text-sm text-gray-900 truncate">
                               {post.title}
                             </h4>
-                            <StatusBadge
-                              posted={post.posted}
-                              
-                            />
+                            <StatusBadge posted={post.posted} />
                           </div>
                           <p className="text-xs text-gray-600 line-clamp-1">
                             {post.description}
@@ -713,12 +727,9 @@ export default function PostsPage() {
                 size="sm"
                 onClick={handleSelectAll}
                 className="flex-1"
-                disabled={
-                  posts.filter((p) => !p.posted).length === 0
-                }
+                disabled={posts.filter((p) => !p.posted).length === 0}
               >
-                {selectedPosts.length ===
-                posts.filter((p) => !p.posted).length
+                {selectedPosts.length === posts.filter((p) => !p.posted).length
                   ? "Deselect All"
                   : "Select All"}
               </Button>
@@ -736,9 +747,7 @@ export default function PostsPage() {
                 onClick={handleStartPosting}
                 className="bg-green-600 hover:bg-green-700 text-white flex-1"
                 size="sm"
-                disabled={
-                  posts.filter((p) => !p.posted).length === 0
-                }
+                disabled={posts.filter((p) => !p.posted).length === 0}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Start Posting
@@ -806,10 +815,7 @@ export default function PostsPage() {
                             <h4 className="font-semibold text-sm text-gray-900 truncate">
                               {post.title}
                             </h4>
-                            <StatusBadge
-                              posted={post.posted}
-                              
-                            />
+                            <StatusBadge posted={post.posted} />
                           </div>
                           <p className="text-xs text-gray-600 line-clamp-1">
                             {post.description}
@@ -863,9 +869,7 @@ export default function PostsPage() {
                 size="sm"
                 onClick={handleSelectAllPosted}
                 className="flex-1"
-                disabled={
-                  posts.filter((p) => p.posted).length === 0
-                }
+                disabled={posts.filter((p) => p.posted).length === 0}
               >
                 {selectedPostedItems.length ===
                 posts.filter((p) => p.posted).length
@@ -877,9 +881,7 @@ export default function PostsPage() {
                 size="sm"
                 onClick={handleDeleteSelectedPosted}
                 className="flex-1"
-                disabled={
-                  posts.filter((p) => p.posted).length === 0
-                }
+                disabled={posts.filter((p) => p.posted).length === 0}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
