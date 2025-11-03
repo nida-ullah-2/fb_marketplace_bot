@@ -50,7 +50,7 @@ export default function EditPostModal({
         price: String(post.price),
         account:
           typeof post.account === "object" ? post.account.id : post.account,
-        posted: post.status === "posted",
+        posted: post.posted || false,
       });
       setImagePreview(post.image || "");
       setImage(null);
