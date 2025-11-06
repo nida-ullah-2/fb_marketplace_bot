@@ -391,7 +391,7 @@ class StartPostingView(APIView):
             manage_py_path = os.path.join(project_root, 'manage.py')
 
             # Build command to run the management command
-            # Passing post IDs as comma-separated string and job ID
+            # Passing post IDs, job ID, and user ID as comma-separated string
             post_ids_str = ','.join(map(str, post_ids))
             command = [
                 python_executable,
@@ -400,15 +400,9 @@ class StartPostingView(APIView):
                 '--post-ids',
                 post_ids_str,
                 '--job-id',
-                job_id
-            ]
-            post_ids_str = ','.join(map(str, post_ids))
-            command = [
-                python_executable,
-                manage_py_path,
-                'post_to_marketplace',
-                '--post-ids',
-                post_ids_str
+                job_id,
+                '--user-id',
+                str(request.user.id)
             ]
 
             # Create log files for debugging

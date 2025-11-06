@@ -7,15 +7,19 @@ from django.urls import reverse
 
 @admin.register(MarketplacePost)
 class MarketplacePostAdmin(admin.ModelAdmin):
-    list_display = ['title', 'account', 'price', 'posted']
-    list_filter = ['posted', 'account']
+    list_display = ['title', 'account', 'price',
+                    'posted', 'created_at']
+    list_filter = ['posted', 'created_at']
     search_fields = ['title', 'description', 'account__email']
-    exclude = ['scheduled_time']  # Hide scheduled_time from admin forms
+    date_hierarchy = 'created_at'
+    readonly_fields = ['created_at', 'updated_at']
 
-    def changelist_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context['bulk_upload_url'] = reverse('bulk_upload_posts')
-        return super().changelist_view(request, extra_context=extra_context)
+    def get_queryset(self, request):
+        """Filter posts by user - superusers see all, staff see only their own"""
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(account__user=request.user)
 
 
 @admin.register(PostAnalytics)
@@ -28,6 +32,13 @@ class PostAnalyticsAdmin(admin.ModelAdmin):
     readonly_fields = ['user', 'account', 'post_id', 'post_title',
                        'action', 'timestamp', 'account_email', 'price']
 
+    def get_queryset(self, request):
+        """Filter analytics by user - superusers see all, staff see only their own"""
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
+
     def has_add_permission(self, request):
         # Prevent manual creation of analytics records
         return False
@@ -39,12 +50,19 @@ class PostAnalyticsAdmin(admin.ModelAdmin):
 
 @admin.register(PostingJob)
 class PostingJobAdmin(admin.ModelAdmin):
-    list_display = ['job_id', 'status', 'total_posts',
+    list_display = ['job_id', 'user', 'status', 'total_posts',
                     'completed_posts', 'failed_posts', 'started_at']
-    list_filter = ['status', 'started_at']
-    search_fields = ['job_id']
-    readonly_fields = ['job_id', 'total_posts', 'completed_posts',
+    list_filter = ['status', 'started_at', 'user']
+    search_fields = ['job_id', 'user__username', 'user__email']
+    readonly_fields = ['job_id', 'user', 'total_posts', 'completed_posts',
                        'failed_posts', 'started_at', 'completed_at']
+
+    def get_queryset(self, request):
+        """Filter posting jobs by user - superusers see all, staff see only their own"""
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
 
 
 @admin.register(ErrorLog)
@@ -53,3 +71,10 @@ class ErrorLogAdmin(admin.ModelAdmin):
     list_filter = ['error_type', 'created_at']
     search_fields = ['post__title', 'error_message']
     date_hierarchy = 'created_at'
+
+    def get_queryset(self, request):
+        """Filter error logs by user - superusers see all, staff see only their own"""
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(post__account__user=request.user)

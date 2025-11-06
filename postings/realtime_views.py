@@ -29,11 +29,14 @@ def posting_status_stream(request, job_id):
 
         while iteration < max_iterations:
             try:
-                # Get current job status
-                job = PostingJob.objects.filter(job_id=job_id).first()
+                # Get current job status - filter by user for security
+                job = PostingJob.objects.filter(
+                    job_id=job_id,
+                    user=request.user
+                ).first()
 
                 if not job:
-                    # Job not found
+                    # Job not found or doesn't belong to user
                     yield f"data: {json.dumps({'error': 'Job not found'})}\n\n"
                     break
 
@@ -77,7 +80,8 @@ def get_posting_job_status(request, job_id):
     Usage: GET /api/posts/job-status/<job_id>/
     """
     try:
-        job = PostingJob.objects.get(job_id=job_id)
+        # Filter by user for security
+        job = PostingJob.objects.get(job_id=job_id, user=request.user)
         serializer = PostingJobSerializer(job)
         return Response(serializer.data)
     except PostingJob.DoesNotExist:
@@ -91,11 +95,12 @@ def get_posting_job_status(request, job_id):
 @permission_classes([IsAuthenticated])
 def get_error_logs(request):
     """
-    Get error logs with optional filtering
+    Get error logs with optional filtering - filtered by current user
     Query params: post_id, error_type, limit
     Usage: GET /api/posts/error-logs/?post_id=1&limit=10
     """
-    error_logs = ErrorLog.objects.all()
+    # Filter error logs to only show current user's posts
+    error_logs = ErrorLog.objects.filter(post__account__user=request.user)
 
     # Filter by post_id if provided
     post_id = request.query_params.get('post_id')
@@ -129,9 +134,10 @@ def health_check_accounts(request):
     """
     Health check endpoint to verify account sessions are valid
     Usage: GET /api/accounts/health-check/
-    Returns status of all accounts and their sessions
+    Returns status of current user's accounts and their sessions
     """
-    accounts = FacebookAccount.objects.all()
+    # Filter accounts by current user
+    accounts = FacebookAccount.objects.filter(user=request.user)
     results = []
 
     for account in accounts:
@@ -195,7 +201,8 @@ def validate_account_session(request, account_id):
     Usage: GET /api/accounts/<id>/validate-session/
     """
     try:
-        account = FacebookAccount.objects.get(id=account_id)
+        # Filter by user for security
+        account = FacebookAccount.objects.get(id=account_id, user=request.user)
 
         # Check session file
         session_file = f"sessions/{account.email.replace('@', '_').replace('.', '_')}.json"

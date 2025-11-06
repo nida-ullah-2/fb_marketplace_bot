@@ -26,6 +26,12 @@ class Command(BaseCommand):
             help='Job ID for tracking progress',
             dest='job_id'
         )
+        parser.add_argument(
+            '--user-id',
+            type=int,
+            help='User ID who initiated the posting job',
+            dest='user_id'
+        )
 
     def handle(self, *args, **options):
         print("Checking for posts to publish...")
@@ -33,6 +39,7 @@ class Command(BaseCommand):
         # Check if specific post IDs were provided
         post_ids_str = options.get('post_ids')
         job_id = options.get('job_id') or str(uuid.uuid4())
+        user_id = options.get('user_id')
 
         if post_ids_str:
             # Parse comma-separated post IDs
@@ -66,13 +73,24 @@ class Command(BaseCommand):
             return
 
         # Create posting job for tracking
-        posting_job = PostingJob.objects.create(
-            job_id=job_id,
-            status='running',
-            total_posts=total_posts,
-            completed_posts=0,
-            failed_posts=0
-        )
+        posting_job_data = {
+            'job_id': job_id,
+            'status': 'running',
+            'total_posts': total_posts,
+            'completed_posts': 0,
+            'failed_posts': 0
+        }
+
+        # Add user if provided
+        if user_id:
+            from accounts.models import CustomUser
+            try:
+                user = CustomUser.objects.get(id=user_id)
+                posting_job_data['user'] = user
+            except CustomUser.DoesNotExist:
+                print(f"Warning: User with ID {user_id} not found")
+
+        posting_job = PostingJob.objects.create(**posting_job_data)
 
         completed = 0
         failed = 0

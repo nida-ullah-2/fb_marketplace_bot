@@ -85,70 +85,41 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(FacebookAccount)
 class FacebookAccountAdmin(admin.ModelAdmin):
-    list_display = ('email', 'user', 'has_session', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('email', 'user__username', 'user__email')
-    readonly_fields = ('created_at',)
-    actions = ['create_sessions']
+    list_display = ['email', 'user', 'session_exists',
+                    'post_count', 'created_at']
+    list_filter = ['created_at', 'user']
+    search_fields = ['email', 'user__username', 'user__email']
+    readonly_fields = ['created_at', 'get_password', 'session_status']
+    date_hierarchy = 'created_at'
 
-    def has_session(self, obj):
+    def get_queryset(self, request):
+        """Filter accounts by user - superusers see all, staff see only their own"""
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(user=request.user)
+
+    def session_exists(self, obj):
+        """Check if session file exists"""
         session_file = f"sessions/{obj.email.replace('@', '_').replace('.', '_')}.json"
         return os.path.exists(session_file)
+    session_exists.boolean = True
+    session_exists.short_description = 'Session File'
 
-    has_session.boolean = True
-    has_session.short_description = 'Session Exists'
+    def post_count(self, obj):
+        """Count posts for this account"""
+        return obj.marketplacepost_set.count()
+    post_count.short_description = 'Posts'
 
-    def save_model(self, request, obj, form, change):
-        """Auto-create session when account is saved (new or edited without session)"""
-        super().save_model(request, obj, form, change)
-
-        # Check if session exists
+    def session_status(self, obj):
+        """Display detailed session status"""
         session_file = f"sessions/{obj.email.replace('@', '_').replace('.', '_')}.json"
-
-        if not os.path.exists(session_file):
-            # Open browser for login
-            from automation.post_to_facebook import save_session
-            from threading import Thread
-
-            def create_session():
-                print(
-                    f"🌐 Opening browser for {obj.email} (session missing)...")
-                try:
-                    success = save_session(obj.email, obj.password)
-                    if success:
-                        print(f"✅ Session created for {obj.email}")
-                    else:
-                        print(f"❌ Failed to create session for {obj.email}")
-                except Exception as e:
-                    print(f"❌ Error creating session: {e}")
-
-            Thread(target=create_session, daemon=True).start()
-
-    def create_sessions(self, request, queryset):
-        """Admin action to create sessions for selected accounts"""
-        from automation.post_to_facebook import save_session
-        from threading import Thread
-
-        def process_accounts():
-            for account in queryset:
-                session_file = f"sessions/{account.email.replace('@', '_').replace('.', '_')}.json"
-                if os.path.exists(session_file):
-                    print(f"✅ Session exists for {account.email}, skipping...")
-                    continue
-
-                print(f"🌐 Opening browser for {account.email}...")
-                try:
-                    success = save_session(account.email, account.password)
-                    if success:
-                        print(f"✅ Session created for {account.email}")
-                    else:
-                        print(
-                            f"❌ Failed to create session for {account.email}")
-                except Exception as e:
-                    print(f"❌ Error: {e}")
-
-        Thread(target=process_accounts, daemon=True).start()
-        self.message_user(
-            request, f"Creating sessions for {queryset.count()} account(s) in background...")
-
-    create_sessions.short_description = "Create sessions for selected accounts"
+        if os.path.exists(session_file):
+            return format_html(
+                '<span style="color: green; font-weight: bold;">✓ Session exists</span>'
+            )
+        else:
+            return format_html(
+                '<span style="color: red; font-weight: bold;">✗ No session</span>'
+            )
+    session_status.short_description = 'Session Status'

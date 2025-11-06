@@ -82,6 +82,14 @@ class PostingJob(models.Model):
     ]
 
     job_id = models.CharField(max_length=100, unique=True)
+    user = models.ForeignKey(
+        'accounts.CustomUser',
+        on_delete=models.CASCADE,
+        related_name='posting_jobs',
+        null=True,  # Temporary for migration
+        blank=True,
+        help_text="User who started this posting job"
+    )
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default='queued')
     total_posts = models.IntegerField()
