@@ -194,7 +194,7 @@ def manual_login_and_save_session(email):
         login_successful = False
         check_interval = 5  # Check every 5 seconds
         max_wait_time = 120  # 2 minutes total
-        elapsed_time = 0
+        elapsed_time = 20
 
         print("👀 Waiting for you to login manually...")
         print("💡 Tip: Take your time, the bot is watching and waiting!")
