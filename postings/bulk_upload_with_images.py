@@ -10,6 +10,8 @@ from rest_framework import status
 from .models import MarketplacePost
 from accounts.models import FacebookAccount
 from django.utils import timezone
+import random
+import re
 
 
 class BulkUploadWithImagesView(APIView):
@@ -65,99 +67,225 @@ class BulkUploadWithImagesView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Parse TXT file
+        # Parse TXT/CSV compact formats
         try:
             decoded_file = txt_file.read().decode('utf-8')
-            lines = decoded_file.strip().split('\n')
+            # Normalize newlines and split
+            raw_lines = [l.strip() for l in re.split(r'\r?\n', decoded_file) if l.strip()]
 
             success_count = 0
             error_count = 0
             errors = []
             posts_data = []
 
-            # Parse TXT file - each product has 3 lines (title, description, price) + blank line
-            product_index = 0
-            i = 0
-            while i < len(lines):
-                line_num = i + 1  # For display purposes
+            # Helper to parse a compact single-line format
+            # Examples accepted:
+            #   "Nice chair | 10-40"
+            #   "Nice chair|10-40"
+            #   "Nice chair - 10-40"
+            price_range_re = re.compile(r"(\d+(?:\.\d+)? )?\s*(\d+(?:\.\d+)?)?\s*-\s*(\d+(?:\.\d+)?)")
 
-                # Skip empty lines at the start
-                if not lines[i].strip():
-                    i += 1
-                    continue
+            def parse_compact_line(line):
+                # If there's a pipe, split into parts
+                if '|' in line:
+                    parts = [p.strip() for p in line.split('|') if p.strip()]
+                    title = parts[0]
+                    if len(parts) == 1:
+                        description = title
+                        price_spec = None
+                    elif len(parts) == 2:
+                        # assume last part is price or range
+                        price_spec = parts[1]
+                        description = title
+                    else:
+                        # title | description | price
+                        description = parts[1]
+                        price_spec = parts[-1]
+                else:
+                    # Try to find a price range with regex
+                    m = re.search(r"(\d+(?:\.\d+)?\s*-\s*\d+(?:\.\d+)?)", line)
+                    if m:
+                        price_spec = m.group(1)
+                        title = line.replace(m.group(1), '').strip(' -|,')
+                        description = title
+                    else:
+                        # No price specified - treat whole line as title
+                        title = line
+                        description = title
+                        price_spec = None
 
-                try:
-                    # Get 3 lines for one product
-                    if i + 2 >= len(lines):
-                        errors.append({
-                            'line': line_num,
-                            'error': 'Incomplete product data (need 3 lines: title, description, price)'
-                        })
-                        error_count += 1
-                        break
+                # Normalize price_spec
+                price = None
+                price_low = None
+                price_high = None
+                if price_spec:
+                    # handle single number or range
+                    if '-' in price_spec:
+                        try:
+                            parts = [p.strip() for p in price_spec.split('-')]
+                            low = float(parts[0])
+                            high = float(parts[1])
+                            if low > high:
+                                low, high = high, low
+                            # store range; sampling will be done per-post later
+                            price_low = low
+                            price_high = high
+                        except Exception:
+                            price_low = price_high = None
+                    else:
+                        try:
+                            price = float(price_spec)
+                        except Exception:
+                            price = None
 
-                    title = lines[i].strip()
-                    description = lines[i + 1].strip()
-                    price_str = lines[i + 2].strip()
+                return {
+                    'title': title,
+                    'description': description,
+                    'price': price,
+                    'price_low': price_low,
+                    'price_high': price_high
+                }
 
-                    # Validate required fields
-                    if not all([title, description, price_str]):
-                        errors.append({
-                            'line': line_num,
-                            'error': 'Missing required fields'
-                        })
-                        error_count += 1
-                        i += 4  # Skip to next product (3 lines + blank line)
-                        product_index += 1
-                        continue
+            # Detect format: if the file appears to be triple-line per product (old format)
+            # we can try to detect by presence of multiple lines that look like a price-only line
+            def looks_like_old_format(lines):
+                # old format uses groups of 3 lines; check if there are price-like lines every 3rd line
+                if len(lines) < 3:
+                    return False
+                sample_count = min(3, len(lines)//3)
+                for i in range(sample_count):
+                    idx = i*3 + 2
+                    if idx < len(lines):
+                        if re.match(r"^\d+(?:\.\d+)?$", lines[idx]):
+                            return True
+                return False
 
-                    # Validate price
+            if looks_like_old_format(raw_lines):
+                # Parse original 3-line-per-product format
+                i = 0
+                product_index = 0
+                while i < len(raw_lines):
                     try:
-                        price_decimal = float(price_str)
-                        if price_decimal < 0:
-                            raise ValueError("Price cannot be negative")
-                    except ValueError:
-                        errors.append({
-                            'line': line_num + 2,
-                            'error': f"Invalid price: {price_str}"
-                        })
-                        error_count += 1
-                        i += 4
+                        if i + 2 >= len(raw_lines):
+                            errors.append({'line': i + 1, 'error': 'Incomplete product data (need 3 lines: title, description, price)'} )
+                            error_count += 1
+                            break
+                        title = raw_lines[i]
+                        description = raw_lines[i+1]
+                        price_str = raw_lines[i+2]
+                        try:
+                            price_decimal = float(price_str)
+                        except ValueError:
+                            errors.append({'line': i + 3, 'error': f'Invalid price: {price_str}'})
+                            error_count += 1
+                            i += 3
+                            product_index += 1
+                            continue
+
+                        posts_data.append({'title': title, 'description': description, 'price': price_decimal, 'price_low': None, 'price_high': None})
                         product_index += 1
-                        continue
+                        i += 3
+                    except Exception as e:
+                        errors.append({'line': i+1, 'error': str(e)})
+                        error_count += 1
+                        i += 3
 
-                    # Get image by ORDER (index matches product index)
-                    image_file = None
-                    if image_files and product_index < len(image_files):
-                        image_file = image_files[product_index]
+            else:
+                # Compact single-line format: one product per line, with optional price or range
+                for idx, line in enumerate(raw_lines):
+                    parsed = parse_compact_line(line)
+                    posts_data.append(parsed)
 
-                    posts_data.append({
-                        'title': title,
-                        'description': description,
-                        'price': price_decimal,
-                        'image_file': image_file
+            # Now map images to posts
+            final_posts = []
+
+            if image_files:
+                num_images = len(image_files)
+                num_products = len(posts_data)
+
+                # Case: single product + multiple images -> replicate product for each image
+                if num_products == 1 and num_images >= 1:
+                    base = posts_data[0]
+                    for img in image_files:
+                        # If base.price is None -> leave None (error will be reported)
+                        final_posts.append({
+                            'title': base['title'],
+                            'description': base['description'],
+                            'price': base.get('price'),
+                            'price_low': base.get('price_low'),
+                            'price_high': base.get('price_high'),
+                            'image_file': img
+                        })
+                else:
+                    # General mapping: pair by order up to max(products, images)
+                    max_count = max(num_products, num_images)
+                    for i in range(max_count):
+                        prod = posts_data[i] if i < num_products else None
+                        img = image_files[i] if i < num_images else None
+                        if prod:
+                            final_posts.append({
+                                'title': prod['title'],
+                                'description': prod.get('description') or prod['title'],
+                                'price': prod.get('price'),
+                                'price_low': prod.get('price_low'),
+                                'price_high': prod.get('price_high'),
+                                'image_file': img
+                            })
+                        else:
+                            # No product but image exists - create a generic post using image filename as title
+                            title = getattr(img, 'name', 'Untitled')
+                            final_posts.append({
+                                'title': title,
+                                'description': title,
+                                'price': None,
+                                'price_low': None,
+                                'price_high': None,
+                                'image_file': img
+                            })
+            else:
+                # No images uploaded: create posts from parsed data (images None)
+                for prod in posts_data:
+                    final_posts.append({
+                        'title': prod['title'],
+                        'description': prod.get('description') or prod['title'],
+                        'price': prod.get('price'),
+                        'price_low': prod.get('price_low'),
+                        'price_high': prod.get('price_high'),
+                        'image_file': None
                     })
-
-                    product_index += 1
-                    i += 4  # Move to next product (3 lines + blank line)
-
-                except Exception as e:
-                    errors.append({
-                        'line': line_num,
-                        'error': str(e)
-                    })
-                    error_count += 1
-                    i += 4
-                    product_index += 1
 
             # Create posts for all accounts
-            for post_data in posts_data:
+            for post_data in final_posts:
+                # Determine actual price per post: if a range was provided, sample per post
+                actual_price = None
+                if post_data.get('price') is not None:
+                    # Convert explicit price to integer (no decimals)
+                    try:
+                        actual_price = int(round(float(post_data.get('price'))))
+                    except Exception:
+                        actual_price = None
+                elif post_data.get('price_low') is not None and post_data.get('price_high') is not None:
+                    try:
+                        low = float(post_data.get('price_low'))
+                        high = float(post_data.get('price_high'))
+                        if low > high:
+                            low, high = high, low
+                        # Sample a value and convert to integer (no decimals)
+                        actual_price = int(round(random.uniform(low, high)))
+                    except Exception:
+                        actual_price = None
+                else:
+                    actual_price = None
+
+                # Build description from title (do NOT include suggested price)
+                desc = post_data.get('description') or post_data.get('title')
+
                 for account in accounts:
                     post = MarketplacePost.objects.create(
                         account=account,
                         title=post_data['title'],
-                        description=post_data['description'],
-                        price=post_data['price'],
+                        description=desc,
+                        price=actual_price if actual_price is not None else 0.0,
                         scheduled_time=timezone.now(),
                         posted=False
                     )
@@ -177,15 +305,15 @@ class BulkUploadWithImagesView(APIView):
                 'stats': {
                     'success_count': success_count,
                     'error_count': error_count,
-                    'num_posts': len(posts_data),
+                    'num_posts_created': len(final_posts),
                     'num_accounts': len(accounts)
                 }
             }
 
             if errors:
-                response_data['errors'] = errors[:10]
-                if len(errors) > 10:
-                    response_data['additional_errors'] = len(errors) - 10
+                response_data['errors'] = errors[:20]
+                if len(errors) > 20:
+                    response_data['additional_errors'] = len(errors) - 20
 
             return Response(response_data, status=status.HTTP_200_OK)
 
