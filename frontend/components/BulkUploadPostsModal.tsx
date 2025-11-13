@@ -119,17 +119,25 @@ export default function BulkUploadPostsModal({
   };
 
   const downloadSampleTXT = () => {
-    const txtContent = `iPhone 13 Pro
+    const txtContent = `# Sample 3-line format (title, description, price)
+iPhone 13 Pro
 Excellent condition iPhone 13 Pro with 256GB storage. Includes original box and accessories.
-699.99
+699
 
 Samsung 55 inch TV
 Brand new 55 inch 4K Smart TV with HDR support. Never used.
-450.00
+450
 
 Gaming Laptop
 High performance gaming laptop with RTX 3060 graphics card. Perfect for gaming and content creation.
-1200.00`;
+1200
+
+# Sample single-line compact format (title | min-max)
+Queen , King and sigle size mattresses and box spring and bed frames and metal frames | 10-50
+
+# Notes:
+# - Single-line compact format: Title | min-max (min and max are integer values).
+# - If you upload multiple images with a single-line product, the product will be replicated for each image and a random integer price will be chosen from the range.`;
 
     const blob = new Blob([txtContent], { type: "text/plain" });
     const url = window.URL.createObjectURL(blob);
@@ -264,41 +272,38 @@ High performance gaming laptop with RTX 3060 graphics card. Perfect for gaming a
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-blue-800 space-y-2">
-                  <p className="font-medium">� Super Simple Upload:</p>
+                  <p className="font-medium">Bulk upload via TXT file</p>
                   <ol className="list-decimal ml-4 space-y-1">
-                    <li>
-                      Create a TXT file with product details (see format below)
-                    </li>
-                    <li>
-                      Upload product images in the SAME ORDER as products in TXT
-                      file
-                    </li>
-                    <li>
-                      App automatically matches: 1st image → 1st product, 2nd →
-                      2nd, etc.
-                    </li>
+                    <li>Prepare a TXT file containing your product entries (formats shown below).</li>
+                    <li>Optionally upload product images. If provided, images must be in the same order as TXT entries.</li>
+                    <li>Select one or more Facebook accounts; the system will create posts for each selected account.</li>
                   </ol>
-                  <p className="font-medium mt-3">��� TXT Format:</p>
+                  <p className="font-medium mt-3">Supported TXT formats</p>
                   <div className="bg-blue-100 p-2 rounded font-mono text-xs overflow-x-auto whitespace-pre-wrap">
-                    Title of Product 1<br />
-                    Description of product 1<br />
-                    Price 1<br />
+                    {/* 3-line format example */}
+                    Sofa
                     <br />
-                    Title of Product 2<br />
-                    Description of product 2<br />
-                    Price 2
+                    Comfortable three-seater sofa, great condition.
+                    <br />
+                    250
+                    <br />
+                    <br />
+                    {/* single-line compact example */}
+                    Blue sofa | 100-250
                   </div>
-                  <p className="text-xs mt-2">
-                    ��� <strong>Tip:</strong> Each product has 3 lines (title,
-                    description, price) followed by a blank line.
-                  </p>
+                    <p className="text-xs mt-2">
+                      <strong>Note:</strong> This interface supports two TXT formats: the traditional 3-line format (title, description, price) or the compact single-line format <code>Title | min-max</code> (for example, <code>Blue sofa | 100-250</code>).
+                    </p>
+                    <p className="text-xs mt-1">
+                      When using the compact <code>min-max</code> format, the system will select a random integer price within the specified range for each created post. If you provide a single product line and upload multiple images, the product will be duplicated for each image (one post per image).
+                    </p>
                   <button
                     type="button"
                     onClick={downloadSampleTXT}
                     className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mt-2"
                   >
                     <Download size={16} />
-                    Download Sample TXT Download Sample CSV
+                    Download Sample TXT
                   </button>
                 </div>
               </div>
@@ -405,10 +410,16 @@ High performance gaming laptop with RTX 3060 graphics card. Perfect for gaming a
                   )}
                 </label>
               </div>
-              <p className="mt-2 text-xs text-gray-500">
-                Upload a TXT file with products (3 lines per product: title,
-                description, price)
-              </p>
+              <div className="mt-2 text-xs text-gray-500">
+                <div>Upload a TXT file. Supported formats:</div>
+                <ul className="list-disc ml-4 mt-1 text-xs">
+                  <li>3-line format (title, description, price)</li>
+                  <li>
+                    Single-line compact format: <code>Title | min-max</code>
+                    (e.g. <code>Chair | 10-40</code>)
+                  </li>
+                </ul>
+              </div>
             </div>
 
             {/* Image Files Upload (NEW!) */}
@@ -458,9 +469,10 @@ High performance gaming laptop with RTX 3060 graphics card. Perfect for gaming a
               <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-xs text-blue-800">
                   💡 <strong>Tip:</strong> Select images in the SAME ORDER as
-                  your CSV rows. The app will automatically match them: 1st
-                  image → 1st product, 2nd image → 2nd product, etc. No need to
-                  rename files!
+                  your TXT rows. The app will automatically match them: 1st
+                  image → 1st product, 2nd image → 2nd product, etc. If you
+                  provide a single-line product and multiple images, the
+                  product will be replicated for each image.
                 </p>
               </div>
             </div>

@@ -6240,3 +6240,83 @@ Total Posts: 90
 Job ID: 32498f93-88d9-42b7-8690-5b3b16a156f6
 ============================================================
 
+
+
+=== Starting posting process at 2025-11-13 01:22:44.267913+00:00 ===
+Project root: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot
+manage.py path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py
+Command: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Scripts\python.exe C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 466 --job-id 296b3f93-ac48-457b-9291-6e4235289262 --user-id 1
+Post IDs: 466
+
+C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [466]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: faceboookmarketplace1@gmail.com
+============================================================
+Posting initiated for account: faceboookmarketplace1@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: king size mattress
+Image path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\media\posts\WhatsApp_Image_2025-11-08_at_6_pGAZSOP.55.42_AM_1.jpeg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+📝 Filling Title...
+💰 Filling Price...
+📂 Selecting Category...
+✅ Clicked on Category dropdown
+✅ Selected Category: Furniture (via text)
+🔧 Selecting Condition...
+✅ Clicked on Condition dropdown
+✅ Selected Condition: New (via text)
+🧾 Filling Description...
+📦 Setting Availability: In Stock...
+❌ Could not find Availability dropdown
+📍 Skipping location (using proxy/VPN for region)...
+
+🔍 DEBUG: After filling all fields
+   URL: https://www.facebook.com/marketplace/create/item
+   ⚠️ No visible buttons found
+
+🔍 Checking for validation errors...
+📜 Scrolling to bottom of form...
+📤 Looking for Next button...
+✅ Clicked Next button (via text)
+⏳ Waiting for Publish button to appear...
+
+🔍 DEBUG: After Next button (or if no Next button)
+   URL: https://www.facebook.com/marketplace/create/item?step=audience
+   ⚠️ No visible buttons found
+
+🔍 Looking for Publish button...
+✅ Clicked Publish button (found as 'Publish')
+✅ Posted successfully!
+✓ Successfully posted "king size mattress" to faceboookmarketplace1@gmail.com
+
+============================================================
+✅ Posting completed for account: faceboookmarketplace1@gmail.com
+Account Summary: 1 successful, 0 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 1
+❌ Failed: 0
+Job ID: 296b3f93-ac48-457b-9291-6e4235289262
+============================================================
+
