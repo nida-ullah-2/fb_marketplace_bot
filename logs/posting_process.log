@@ -9336,3 +9336,302 @@ Total Posts: 1
 Job ID: ffc5357d-cfad-4b51-b73c-73fb52933135
 ============================================================
 
+
+
+=== Starting posting process at 2025-11-14 19:00:22.967270+00:00 ===
+Project root: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot
+manage.py path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py
+Command: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Scripts\python.exe C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 832 --job-id 5369e9a6-d98c-4d60-9a61-ed9a204aa89d --user-id 1
+Post IDs: 832
+
+C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [832]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: posttomarketplace6@gmail.com
+============================================================
+Posting initiated for account: posttomarketplace6@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: mattress
+Image path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\media\posts\WhatsApp_Image_2025-10-31_at_7_rBR8Cmf.21.17_AM.jpeg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+❌ Something went wrong while trying to fill the form.
+📷 Screenshot saved as error_screenshot.png
+✗ Failed to post "mattress" to posttomarketplace6@gmail.com: Locator.set_input_files: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("input[type='file'][accept*='image']")
+
+
+============================================================
+✅ Posting completed for account: posttomarketplace6@gmail.com
+Account Summary: 0 successful, 1 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 0
+❌ Failed: 1
+Job ID: 5369e9a6-d98c-4d60-9a61-ed9a204aa89d
+============================================================
+
+
+
+=== Starting posting process at 2025-11-14 19:14:40.662600+00:00 ===
+Project root: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot
+manage.py path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py
+Command: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Scripts\python.exe C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 832 --job-id 145327f5-fa23-422a-97cc-a5a9bec01cdc --user-id 1
+Post IDs: 832
+
+C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [832]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: posttomarketplace6@gmail.com
+============================================================
+Posting initiated for account: posttomarketplace6@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: mattress
+Image path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\media\posts\WhatsApp_Image_2025-10-31_at_7_rBR8Cmf.21.17_AM.jpeg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+❌ Something went wrong while trying to fill the form.
+📷 Screenshot saved as error_screenshot.png
+✗ Failed to post "mattress" to posttomarketplace6@gmail.com: Locator.set_input_files: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("input[type='file'][accept*='image']")
+
+
+============================================================
+✅ Posting completed for account: posttomarketplace6@gmail.com
+Account Summary: 0 successful, 1 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 0
+❌ Failed: 1
+Job ID: 145327f5-fa23-422a-97cc-a5a9bec01cdc
+============================================================
+
+
+
+=== Starting posting process at 2025-11-14 19:15:49.602820+00:00 ===
+Project root: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot
+manage.py path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py
+Command: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Scripts\python.exe C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 832 --job-id cd4e155d-59e6-4631-86ad-fae79f09fc50 --user-id 1
+Post IDs: 832
+
+C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [832]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: posttomarketplace6@gmail.com
+============================================================
+Posting initiated for account: posttomarketplace6@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: mattress
+Image path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\media\posts\WhatsApp_Image_2025-10-31_at_7_rBR8Cmf.21.17_AM.jpeg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+❌ Something went wrong while trying to fill the form.
+📷 Screenshot saved as error_screenshot.png
+✗ Failed to post "mattress" to posttomarketplace6@gmail.com: Locator.set_input_files: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("input[type='file'][accept*='image']")
+
+
+============================================================
+✅ Posting completed for account: posttomarketplace6@gmail.com
+Account Summary: 0 successful, 1 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 0
+❌ Failed: 1
+Job ID: cd4e155d-59e6-4631-86ad-fae79f09fc50
+============================================================
+
+
+
+=== Starting posting process at 2025-11-14 19:30:38.199534+00:00 ===
+Project root: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot
+manage.py path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py
+Command: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Scripts\python.exe C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 832 --job-id 8092083f-39d1-45b8-acfd-4477295e7516 --user-id 1
+Post IDs: 832
+
+C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [832]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: posttomarketplace6@gmail.com
+============================================================
+Posting initiated for account: posttomarketplace6@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: mattress
+Image path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\media\posts\WhatsApp_Image_2025-10-31_at_7_rBR8Cmf.21.17_AM.jpeg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+📝 Filling Title...
+💰 Filling Price...
+📂 Selecting Category...
+✅ Clicked on Category dropdown
+✅ Selected Category: Furniture (via text)
+🔧 Selecting Condition...
+✅ Clicked on Condition dropdown
+✅ Selected Condition: New (via text)
+🧾 Filling Description...
+📦 Setting Availability: In Stock...
+❌ Could not find Availability dropdown
+📍 Skipping location (using proxy/VPN for region)...
+📤 Looking for Next button...
+⚠️ Could not find Next button - form might be single page, looking for Publish directly
+🔍 Looking for Publish button...
+✅ Clicked Publish button (role, found as 'Publish')
+✅ Posted successfully!
+✓ Successfully posted "mattress" to posttomarketplace6@gmail.com
+
+============================================================
+✅ Posting completed for account: posttomarketplace6@gmail.com
+Account Summary: 1 successful, 0 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 1
+❌ Failed: 0
+Job ID: 8092083f-39d1-45b8-acfd-4477295e7516
+============================================================
+
+
+
+=== Starting posting process at 2025-11-14 19:33:34.011583+00:00 ===
+Project root: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot
+manage.py path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py
+Command: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Scripts\python.exe C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 833 --job-id c69bbf2e-e591-4fdb-863d-a5e1b73456d7 --user-id 1
+Post IDs: 833
+
+C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [833]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: posttomarketplace6@gmail.com
+============================================================
+Posting initiated for account: posttomarketplace6@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: new mattressess
+Image path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\media\posts\WhatsApp_Image_2025-10-31_at_7_kkKJVWz.21.13_AM_1.jpeg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+📝 Filling Title...
+💰 Filling Price...
+📂 Selecting Category...
+✅ Clicked on Category dropdown
+✅ Selected Category: Furniture (via text)
+🔧 Selecting Condition...
+✅ Clicked on Condition dropdown
+✅ Selected Condition: New (via text)
+🧾 Filling Description...
+📦 Setting Availability: In Stock...
+❌ Could not find Availability dropdown
+📍 Skipping location (using proxy/VPN for region)...
+📤 Looking for Next button...
+⚠️ Could not find Next button - form might be single page, looking for Publish directly
+🔍 Looking for Publish button...
+✅ Clicked Publish button (role, found as 'Publish')
+✅ Posted successfully!
+✓ Successfully posted "new mattressess" to posttomarketplace6@gmail.com
+
+============================================================
+✅ Posting completed for account: posttomarketplace6@gmail.com
+Account Summary: 1 successful, 0 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 1
+❌ Failed: 0
+Job ID: c69bbf2e-e591-4fdb-863d-a5e1b73456d7
+============================================================
+
