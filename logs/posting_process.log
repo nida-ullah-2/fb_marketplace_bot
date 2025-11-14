@@ -9281,3 +9281,58 @@ Total Posts: 1
 Job ID: 0d9b3ebe-fcf8-4e26-9fae-dded264eda10
 ============================================================
 
+
+
+=== Starting posting process at 2025-11-14 18:52:42.898199+00:00 ===
+Project root: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot
+manage.py path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py
+Command: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Scripts\python.exe C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 831 --job-id ffc5357d-cfad-4b51-b73c-73fb52933135 --user-id 1
+Post IDs: 831
+
+C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [831]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: btwo08895@gmail.com
+============================================================
+Posting initiated for account: btwo08895@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: queen size mat
+Image path: C:\Users\Administrator\Documents\development\v2_project\fb_marketplace_bot\media\posts\WhatsApp_Image_2025-10-31_at_7_6RjOulf.21.17_AM.jpeg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+❌ Something went wrong while trying to fill the form.
+📷 Screenshot saved as error_screenshot.png
+✗ Failed to post "queen size mat" to btwo08895@gmail.com: Locator.set_input_files: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("input[type='file'][accept*='image']")
+
+
+============================================================
+✅ Posting completed for account: btwo08895@gmail.com
+Account Summary: 0 successful, 1 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 0
+❌ Failed: 1
+Job ID: ffc5357d-cfad-4b51-b73c-73fb52933135
+============================================================
+
