@@ -9903,3 +9903,137 @@ Total Posts: 1
 Job ID: 752a355b-1dbe-4374-abcf-12b47fe9fc90
 ============================================================
 
+
+
+=== Starting posting process at 2025-11-15 18:19:58.771138+00:00 ===
+Project root: C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot
+manage.py path: C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\manage.py
+Command: C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\env\Scripts\python.exe C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 837 --job-id 84dc6d6e-0840-428b-83cf-358bbd81cf78 --user-id 1
+Post IDs: 837
+
+C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [837]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: saadk9968@gmail.com
+============================================================
+Posting initiated for account: saadk9968@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: teste
+Image path: C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\media\posts\541476419_1329871001986802_6106331284652157513_n_owywvqz.jpg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+📝 Filling Title...
+💰 Filling Price...
+📂 Selecting Category...
+✅ Clicked on Category dropdown
+✅ Selected Category: Furniture (via text)
+🔧 Selecting Condition...
+✅ Clicked on Condition dropdown
+✅ Selected Condition: New (via text)
+🧾 Filling Description...
+📦 Setting Availability: In Stock...
+❌ Could not find Availability dropdown
+📍 Skipping location (using proxy/VPN for region)...
+📤 Looking for Next button...
+✅ Clicked Next button (via text)
+🔍 Looking for Publish button...
+✅ Clicked Publish button (found as 'Publish')
+✅ Posted successfully!
+✓ Successfully posted "teste" to saadk9968@gmail.com
+
+============================================================
+✅ Posting completed for account: saadk9968@gmail.com
+Account Summary: 1 successful, 0 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 1
+❌ Failed: 0
+Job ID: 84dc6d6e-0840-428b-83cf-358bbd81cf78
+============================================================
+
+
+
+=== Starting posting process at 2025-11-15 18:24:36.506047+00:00 ===
+Project root: C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot
+manage.py path: C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\manage.py
+Command: C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\env\Scripts\python.exe C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\manage.py post_to_marketplace --post-ids 838 --job-id 68705f24-96bb-40b2-8874-6620e96a808f --user-id 1
+Post IDs: 838
+
+C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\env\Lib\site-packages\rest_framework_simplejwt\__init__.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+Checking for posts to publish...
+Publishing specific posts: [838]
+Found 1 posts to publish
+
+============================================================
+Starting posting process for 1 account(s)
+============================================================
+
+
+============================================================
+📧 ACCOUNT 1/1: saadkhan@gmail.com
+============================================================
+Posting initiated for account: saadkhan@gmail.com
+Posts to publish: 1
+============================================================
+
+
+Processing post: 12
+Image path: C:\Users\NidaUllah\OneDrive - Higher Education Commission\Documents\Development\fast_listing_bot\fb_marketplace_bot\media\posts\541476419_1329871001986802_6106331284652157513_n_Lz7jgAx.jpg
+🤖 Running in HEADLESS mode (background posting)
+🌐 Opening Marketplace listing page...
+📸 Uploading image first...
+📝 Filling Title...
+💰 Filling Price...
+📂 Selecting Category...
+✅ Clicked on Category dropdown
+✅ Selected Category: Furniture (via text)
+🔧 Selecting Condition...
+✅ Clicked on Condition dropdown
+✅ Selected Condition: New (via text)
+🧾 Filling Description...
+📦 Setting Availability: In Stock...
+❌ Could not find Availability dropdown
+📍 Skipping location (using proxy/VPN for region)...
+📤 Looking for Next button...
+✅ Clicked Next button (via text)
+🔍 Looking for Publish button...
+✅ Clicked Publish button (found as 'Publish')
+✅ Posted successfully!
+✓ Successfully posted "12" to saadkhan@gmail.com
+
+============================================================
+✅ Posting completed for account: saadkhan@gmail.com
+Account Summary: 1 successful, 0 failed
+============================================================
+
+
+============================================================
+🎉 ALL POSTING COMPLETED!
+============================================================
+Total Accounts Processed: 1
+Total Posts: 1
+✅ Successful: 1
+❌ Failed: 0
+Job ID: 68705f24-96bb-40b2-8874-6620e96a808f
+============================================================
+
