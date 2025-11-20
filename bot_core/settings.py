@@ -33,10 +33,10 @@ FACEBOOK_PASSWORD_ENCRYPTION_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-# ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['api.nidaullah.tech', 'nidaullah.tech', 'www.nidaullah.tech', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['api.nidaullah.tech', 'nidaullah.tech', 'www.nidaullah.tech', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -65,7 +65,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     # CORS - must be before CommonMiddleware
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -198,36 +198,36 @@ SIMPLE_JWT = {
 
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
-    # "http://localhost:3000",
-    # "http://127.0.0.1:3000",
-    # "https://fb-maketplace-frontend-five.vercel.app",
-    # "https://fb-maketplace-frontend-git-main-nidaullahs-projects-ef5a235f.vercel.app",
-    # "https://fb-maketplace-frontend-nac3dfqfp-nidaullahs-projects-ef5a235f.vercel.app",
-    # "https://thuy-butlerlike-subculturally.ngrok-free.dev",  # Add your ngrok URL
-    # "https://www.nidaullah.tech", 
-    # "https://nidaullah.tech",
-    # "https://api.nidaullah.tech",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://fb-maketplace-frontend-five.vercel.app",
-    "https://www.nidaullah.tech",
+    "https://fb-maketplace-frontend-git-main-nidaullahs-projects-ef5a235f.vercel.app",
+    "https://fb-maketplace-frontend-nac3dfqfp-nidaullahs-projects-ef5a235f.vercel.app",
+    "https://thuy-butlerlike-subculturally.ngrok-free.dev",  # Add your ngrok URL
+    "https://www.nidaullah.tech", 
     "https://nidaullah.tech",
     "https://api.nidaullah.tech",
+    "https://fb-maketplace-frontend-five.vercel.app",
+#     "https://www.nidaullah.tech",
+#     "https://nidaullah.tech",
+#     "https://api.nidaullah.tech",
 ]
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
-    # "http://localhost:3000",
-    # "http://127.0.0.1:3000",
-    # "https://fb-maketplace-frontend-five.vercel.app",
-    # "https://fb-maketplace-frontend-git-main-nidaullahs-projects-ef5a235f.vercel.app",
-    # "https://fb-maketplace-frontend-nac3dfqfp-nidaullahs-projects-ef5a235f.vercel.app",
-    # "https://www.nidaullah.tech",
-    # "https://nidaullah.tech",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://fb-maketplace-frontend-five.vercel.app",
+    "https://fb-maketplace-frontend-git-main-nidaullahs-projects-ef5a235f.vercel.app",
+    "https://fb-maketplace-frontend-nac3dfqfp-nidaullahs-projects-ef5a235f.vercel.app",
     "https://www.nidaullah.tech",
     "https://nidaullah.tech",
+    # "https://fb-maketplace-frontend-five.vercel.app",
+    # "https://www.nidaullah.tech",
+    # "https://nidaullah.tech",
 ]
 
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = [
@@ -279,4 +279,4 @@ AUTOMATION_MAX_ACCOUNTS_PER_IP = int(
 AUTOMATION_SESSION_TIMEOUT = int(os.environ.get(
     'SESSION_TIMEOUT', '3600'))  # 1 hour in seconds
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
