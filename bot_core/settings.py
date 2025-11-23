@@ -35,9 +35,9 @@ FACEBOOK_PASSWORD_ENCRYPTION_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = ['torie-hippiest-jeni.ngrok-free.dev', 'nidaullah.tech', 'www.nidaullah.tech', 'localhost']
-# ALLOWED_HOSTS = ['api.nidaullah.tech', 'nidaullah.tech', 'www.nidaullah.tech', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['api.nidaullah.tech', 'nidaullah.tech', 'www.nidaullah.tech', 'localhost', '127.0.0.1']
 
 
 # Application definition
