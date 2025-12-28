@@ -10,9 +10,11 @@ from .serializers import UserSerializer, RegisterSerializer, FacebookAccountSeri
 from .models import CustomUser, FacebookAccount
 from postings.models import MarketplacePost
 from automation.post_to_facebook import save_session, manual_login_and_save_session
+from automation.session_converter import auto_convert_session, is_browser_format
 from threading import Thread
 import os
 import re
+import json
 
 
 def validate_password_strength(password):
@@ -763,4 +765,148 @@ def reset_user_password(request, user_id):
         return Response(
             {'error': 'User not found'},
             status=status.HTTP_404_NOT_FOUND
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def import_session(request):
+    """
+    Import a Facebook session from browser-exported JSON.
+    Automatically detects format, validates, converts if needed, and saves.
+    """
+    session_data = request.data.get('session_data')
+    filename = request.data.get('filename')
+
+    if not session_data:
+        return Response(
+            {'error': 'Session data is required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not filename:
+        return Response(
+            {'error': 'Filename is required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        # Parse JSON if it's a string
+        if isinstance(session_data, str):
+            parsed_data = json.loads(session_data)
+        else:
+            parsed_data = session_data
+
+        # Detect format
+        format_type = "browser" if is_browser_format(
+            parsed_data) else "playwright"
+
+        # Auto-convert if needed
+        playwright_session = auto_convert_session(parsed_data)
+
+        # Validate required cookies
+        cookies = playwright_session.get('cookies', [])
+        if not cookies:
+            return Response(
+                {'error': 'No cookies found in session data'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Extract essential cookies
+        cookie_names = {cookie['name'] for cookie in cookies}
+        required_cookies = {'c_user', 'xs'}
+        missing_cookies = required_cookies - cookie_names
+
+        if missing_cookies:
+            return Response(
+                {'error': f'Missing required cookies: {", ".join(missing_cookies)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Extract Facebook user ID from c_user cookie
+        fb_user_id = None
+        for cookie in cookies:
+            if cookie['name'] == 'c_user':
+                fb_user_id = cookie['value']
+                break
+
+        # Prepare filename (ensure proper format)
+        clean_filename = filename.replace('@', '_').replace('.', '_')
+        if not clean_filename.endswith('.json'):
+            clean_filename += '.json'
+
+        # Only accept email format (e.g., test@gmail.com)
+        email = filename.strip().replace('.json', '')  # Remove .json if present
+
+        # Validate email format - must have @ and domain with .
+        if '@' not in email:
+            return Response(
+                {'error': 'Invalid format. Please provide a valid email address (e.g., test@gmail.com)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if domain has a dot
+        email_parts = email.split('@')
+        if len(email_parts) != 2 or '.' not in email_parts[1]:
+            return Response(
+                {'error': 'Invalid email format. Please provide a valid email address (e.g., test@gmail.com)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if account already exists for this user
+        existing_account = FacebookAccount.objects.filter(
+            email=email,
+            user=request.user
+        ).first()
+
+        if existing_account:
+            return Response(
+                {'error': f'Account with email {email} already exists. Please use "Update Session" button on the existing account instead, or delete it first.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Save session file
+        session_path = os.path.join('sessions', clean_filename)
+        os.makedirs('sessions', exist_ok=True)
+
+        with open(session_path, 'w', encoding='utf-8') as f:
+            json.dump(playwright_session, f, indent=2)
+
+        # Create new account with placeholder password
+        account = FacebookAccount.objects.create(
+            email=email,
+            user=request.user
+        )
+        account.set_password('imported_session_no_password')
+        account.save()
+
+        created = True
+
+        # Prepare response
+        was_converted = format_type == "browser"
+
+        return Response({
+            'success': True,
+            'message': 'Session imported successfully',
+            'details': {
+                'filename': clean_filename,
+                'format': format_type,
+                'converted': was_converted,
+                'cookies_count': len(cookies),
+                'facebook_user_id': fb_user_id,
+                'email': email,
+                'account_created': created,
+                'account_id': account.id
+            }
+        }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+    except json.JSONDecodeError:
+        return Response(
+            {'error': 'Invalid JSON format'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to import session: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

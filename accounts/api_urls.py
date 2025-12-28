@@ -34,6 +34,8 @@ urlpatterns = [
          name='add_account_manual_login'),
     path('accounts/bulk-upload/', api_views.bulk_upload_accounts_with_login,
          name='bulk_upload_accounts'),
+    path('accounts/import-session/', api_views.import_session,
+         name='import_session'),
     path('accounts/<int:pk>/update-session/', api_views.update_account_session,
          name='update_account_session'),
     path('accounts/<int:pk>/',
