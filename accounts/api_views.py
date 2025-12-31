@@ -10,6 +10,7 @@ from .serializers import UserSerializer, RegisterSerializer, FacebookAccountSeri
 from .models import CustomUser, FacebookAccount
 from postings.models import MarketplacePost
 from automation.post_to_facebook import save_session, manual_login_and_save_session
+from automation.renew_posts import renew_listings as renew_listings_automation
 from automation.session_converter import auto_convert_session, is_browser_format
 from threading import Thread
 import os
@@ -910,3 +911,62 @@ def import_session(request):
             {'error': f'Failed to import session: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def renew_listings(request):
+    """Renew marketplace listings for selected accounts"""
+    account_ids = request.data.get('account_ids', [])
+    renewal_count = request.data.get('renewal_count', 20)
+
+    if not account_ids:
+        return Response(
+            {'error': 'Please select at least one account'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not isinstance(renewal_count, int) or renewal_count < 1 or renewal_count > 20:
+        return Response(
+            {'error': 'Renewal count must be between 1 and 20 (Facebook limit)'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Get accounts belonging to the user
+    accounts = FacebookAccount.objects.filter(
+        id__in=account_ids,
+        user=request.user
+    )
+
+    if not accounts.exists():
+        return Response(
+            {'error': 'No valid accounts found'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    results = []
+
+    for account in accounts:
+        # Call the automation function just like posting does
+        result = renew_listings_automation(
+            email=account.email,
+            renewal_count=renewal_count,
+            headless=True  # Running in headless mode for better performance
+        )
+
+        # Add account info to result
+        result['account_id'] = account.id
+        result['email'] = account.email
+        results.append(result)
+
+    # Calculate totals
+    total_renewed = sum(r['renewed_count'] for r in results)
+    successful_accounts = sum(1 for r in results if r['success'])
+
+    return Response({
+        'success': True,
+        'total_renewed': total_renewed,
+        'successful_accounts': successful_accounts,
+        'total_accounts': len(accounts),
+        'results': results
+    })

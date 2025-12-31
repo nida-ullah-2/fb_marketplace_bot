@@ -1,0 +1,2 @@
+app run= waitress-serve --listen=0.0.0.0:9000 --threads=32 --backlog=4096 --channel-timeout=120 bot_core.wsgi:application
+cloudflared tunnel = cloudflared tunnel run django-backend

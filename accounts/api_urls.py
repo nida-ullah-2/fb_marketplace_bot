@@ -40,6 +40,8 @@ urlpatterns = [
          name='update_account_session'),
     path('accounts/<int:pk>/',
          api_views.FacebookAccountDetailView.as_view(), name='account_detail'),
+    path('accounts/renew-listings/', api_views.renew_listings,
+         name='renew_listings'),
 
     # Health checks
     path('accounts/health-check/',
