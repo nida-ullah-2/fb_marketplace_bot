@@ -17,6 +17,14 @@ import os
 import re
 import json
 
+# Import sequential browser manager functions
+from automation.sequential_browser_manager import (
+    post_to_marketplace_sequential,
+    renew_listings_sequential,
+    get_user_automation_status,
+    get_all_automation_status
+)
+
 
 def validate_password_strength(password):
     """Validate password contains uppercase, lowercase, number, and special character"""
@@ -947,11 +955,10 @@ def renew_listings(request):
     results = []
 
     for account in accounts:
-        # Call the automation function just like posting does
-        result = renew_listings_automation(
+        # ✅ USE SEQUENTIAL QUEUE SYSTEM for proper browser management
+        result = renew_listings_sequential(
             email=account.email,
-            renewal_count=renewal_count,
-            headless=True  # Running in headless mode for better performance
+            renewal_count=renewal_count
         )
 
         # Add account info to result
