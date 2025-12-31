@@ -2,19 +2,21 @@
 Sequential Queue Manager for Facebook Marketplace Bot
 ====================================================
 
-IMPROVED APPROACH - 2 QUEUES PER USER:
-- Each user has 2 separate queues: POST queue and RENEW queue
-- Both queues process in parallel (max 2 browsers per user)
-- Sequential within each queue type (posts run one-by-one, renews run one-by-one)
-- No limit on queue size - can handle unlimited operations
+✅ TRUE SEQUENTIAL - GLOBAL QUEUES:
+- ONE global POST queue for ALL users
+- ONE global RENEW queue for ALL users  
+- Each queue processes ONE operation at a time (TRUE sequential)
+- Both queues can run in parallel (max 2 browsers total, not per user)
 
 EXAMPLE:
-User adds: Post1, Post2, Renew1, Post3, Renew2
+User1 adds: Post1, Renew1
+User2 adds: Post2, Renew2
+User3 adds: Post3, Renew3
 
-POST Queue: [Post1, Post2, Post3]  → Browser 1 processes sequentially
-RENEW Queue: [Renew1, Renew2]      → Browser 2 processes sequentially
+GLOBAL POST Queue: [Post1, Post2, Post3]  → Processes 1-by-1
+GLOBAL RENEW Queue: [Renew1, Renew2, Renew3]  → Processes 1-by-1
 
-Both run in parallel = Faster processing with controlled browsers
+Max 2 browsers total = POST browser + RENEW browser (not multiplied by users)
 """
 
 import threading
@@ -33,26 +35,26 @@ logger = logging.getLogger(__name__)
 
 class SequentialBrowserManager:
     """
-    Manages 2 parallel sequential queues per user
+    Manages 2 GLOBAL sequential queues (not per user)
 
     STRUCTURE:
-    - Each user gets 2 queues: posting_queue and renewing_queue
-    - Each queue processes sequentially (one operation at a time)
-    - Both queues can run in parallel (max 2 browsers per user)
-    - Multiple users can work simultaneously
+    - ONE global POST queue for all users
+    - ONE global RENEW queue for all users
+    - Each queue processes one operation at a time (TRUE sequential)
+    - Both queues can run in parallel (max 2 browsers total)
     """
 
     def __init__(self):
-        # Separate queues for each operation type per user
-        self.user_post_queues = defaultdict(deque)     # POST operations
-        self.user_renew_queues = defaultdict(deque)    # RENEW operations
+        # ✅ GLOBAL QUEUES - all users share the same queues
+        self.global_post_queue = deque()     # All POST operations
+        self.global_renew_queue = deque()    # All RENEW operations
 
-        # Track active processors per user per type
-        self.user_post_processors = {}   # Posting processors
-        self.user_renew_processors = {}  # Renewing processors
+        # Single processors for global queues
+        self.post_processor = None   # One posting processor
+        self.renew_processor = None  # One renewing processor
 
         # Track status for monitoring
-        self.user_status = defaultdict(lambda: {
+        self.status = {
             'post_active': False,
             'renew_active': False,
             'current_post_operation': None,
@@ -62,16 +64,16 @@ class SequentialBrowserManager:
             'posts_completed': 0,
             'renews_completed': 0,
             'last_activity': None
-        })
+        }
 
         # Thread lock for thread-safe operations
         self.lock = threading.Lock()
 
-        print("🚀 Sequential Browser Manager initialized (2 queues per user)")
+        print("🚀 Sequential Browser Manager initialized (GLOBAL queues - TRUE sequential)")
 
     def add_posting_operation(self, email, title, description, price, image_path):
         """
-        Add a posting operation to user's POST queue
+        Add a posting operation to GLOBAL POST queue
 
         Args:
             email: Facebook account email
@@ -93,121 +95,111 @@ class SequentialBrowserManager:
         }
 
         with self.lock:
-            self.user_post_queues[email].append(operation)
-            self.user_status[email]['total_posts_queued'] += 1
+            self.global_post_queue.append(operation)
+            self.status['total_posts_queued'] += 1
 
             print(f"📝 Added POSTING operation for {email}")
-            print(f"   POST queue size: {len(self.user_post_queues[email])}")
+            print(f"   GLOBAL POST queue size: {len(self.global_post_queue)}")
 
             # Start post processor if not already active
-            if not self.user_status[email]['post_active']:
-                self._start_post_processor(email)
+            if not self.status['post_active']:
+                self._start_post_processor()
 
     def add_renewing_operation(self, email, renewal_count=20):
         """
-        Add a renewing operation to user's RENEW queue
+        Add a renewing operation to GLOBAL RENEW queue
 
         Args:
             email: Facebook account email
-            renewal_count: Number of listings to renew (no limit, uses user's value)
+            renewal_count: Number of listings to renew
         """
         operation = {
             'type': 'renew',
             'email': email,
             'data': {
-                'renewal_count': renewal_count  # Use whatever user specifies
+                'renewal_count': renewal_count
             },
             'timestamp': timezone.now()
         }
 
         with self.lock:
-            self.user_renew_queues[email].append(operation)
-            self.user_status[email]['total_renews_queued'] += 1
+            self.global_renew_queue.append(operation)
+            self.status['total_renews_queued'] += 1
 
             print(f"🔄 Added RENEWING operation for {email}")
-            print(f"   RENEW queue size: {len(self.user_renew_queues[email])}")
+            print(
+                f"   GLOBAL RENEW queue size: {len(self.global_renew_queue)}")
 
             # Start renew processor if not already active
-            if not self.user_status[email]['renew_active']:
-                self._start_renew_processor(email)
+            if not self.status['renew_active']:
+                self._start_renew_processor()
 
-    def _start_post_processor(self, email):
+    def _start_post_processor(self):
         """
-        Start sequential processor for user's POST queue
-
-        Args:
-            email: User email to start post processing for
+        Start GLOBAL sequential processor for POST queue
         """
-        if email in self.user_post_processors:
+        if self.post_processor:
             # Already has a post processor
             return
 
         # Create single-threaded executor for sequential post processing
-        self.user_post_processors[email] = ThreadPoolExecutor(
-            max_workers=1, thread_name_prefix=f"post_{email}")
-        self.user_status[email]['post_active'] = True
+        self.post_processor = ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="global_post")
+        self.status['post_active'] = True
 
         # Submit the processing task
-        future = self.user_post_processors[email].submit(
-            self._process_post_queue, email)
-        future.add_done_callback(lambda f: self._cleanup_post_processor(email))
+        future = self.post_processor.submit(self._process_post_queue)
+        future.add_done_callback(lambda f: self._cleanup_post_processor())
 
-        print(f"🎬 Started POST processor for {email}")
+        print(f"🎬 Started GLOBAL POST processor")
 
-    def _start_renew_processor(self, email):
+    def _start_renew_processor(self):
         """
-        Start sequential processor for user's RENEW queue
-
-        Args:
-            email: User email to start renew processing for
+        Start GLOBAL sequential processor for RENEW queue
         """
-        if email in self.user_renew_processors:
+        if self.renew_processor:
             # Already has a renew processor
             return
 
         # Create single-threaded executor for sequential renew processing
-        self.user_renew_processors[email] = ThreadPoolExecutor(
-            max_workers=1, thread_name_prefix=f"renew_{email}")
-        self.user_status[email]['renew_active'] = True
+        self.renew_processor = ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="global_renew")
+        self.status['renew_active'] = True
 
         # Submit the processing task
-        future = self.user_renew_processors[email].submit(
-            self._process_renew_queue, email)
-        future.add_done_callback(
-            lambda f: self._cleanup_renew_processor(email))
+        future = self.renew_processor.submit(self._process_renew_queue)
+        future.add_done_callback(lambda f: self._cleanup_renew_processor())
 
-        print(f"🎬 Started RENEW processor for {email}")
+        print(f"🎬 Started GLOBAL RENEW processor")
 
-    def _process_post_queue(self, email):
+    def _process_post_queue(self):
         """
-        Process POST operations sequentially for a specific user
-
-        Args:
-            email: User email whose post queue to process
+        Process POST operations sequentially from GLOBAL queue
         """
-        print(f"\n🎯 POST processor started for: {email}")
-        print(
-            f"   Initial POST queue size: {len(self.user_post_queues[email])}")
+        print(f"\n🎯 GLOBAL POST processor started")
+        print(f"   Initial POST queue size: {len(self.global_post_queue)}")
 
         while True:
             # Get next post operation
             operation = None
             with self.lock:
-                if self.user_post_queues[email]:
-                    operation = self.user_post_queues[email].popleft()
+                if self.global_post_queue:
+                    operation = self.global_post_queue.popleft()
                 else:
                     # No more post operations, mark as inactive
-                    self.user_status[email]['post_active'] = False
+                    self.status['post_active'] = False
                     break
 
             if operation:
+                email = operation['email']
+
                 # Update status
-                self.user_status[email]['current_post_operation'] = 'Posting'
-                self.user_status[email]['last_activity'] = timezone.now()
+                self.status['current_post_operation'] = f'Posting for {email}'
+                self.status['last_activity'] = timezone.now()
 
                 print(f"\n▶️ Processing POST for {email}")
                 print(
-                    f"   Remaining POST operations: {len(self.user_post_queues[email])}")
+                    f"   Remaining POST operations: {len(self.global_post_queue)}")
 
                 # Process the posting operation
                 try:
@@ -215,7 +207,7 @@ class SequentialBrowserManager:
 
                     # Update completed count
                     with self.lock:
-                        self.user_status[email]['posts_completed'] += 1
+                        self.status['posts_completed'] += 1
 
                     print(f"✅ Completed POST operation for {email}")
 
@@ -225,45 +217,42 @@ class SequentialBrowserManager:
                         f"Post operation failed for {email}: {str(e)}")
 
                 # Clear current operation status
-                self.user_status[email]['current_post_operation'] = None
+                self.status['current_post_operation'] = None
 
                 # Small delay between operations
                 time.sleep(1)
 
-        print(f"🏁 POST processor finished for: {email}")
-        print(
-            f"   Total posts completed: {self.user_status[email]['posts_completed']}")
+        print(f"🏁 GLOBAL POST processor finished")
+        print(f"   Total posts completed: {self.status['posts_completed']}")
 
-    def _process_renew_queue(self, email):
+    def _process_renew_queue(self):
         """
-        Process RENEW operations sequentially for a specific user
-
-        Args:
-            email: User email whose renew queue to process
+        Process RENEW operations sequentially from GLOBAL queue
         """
-        print(f"\n🎯 RENEW processor started for: {email}")
-        print(
-            f"   Initial RENEW queue size: {len(self.user_renew_queues[email])}")
+        print(f"\n🎯 GLOBAL RENEW processor started")
+        print(f"   Initial RENEW queue size: {len(self.global_renew_queue)}")
 
         while True:
             # Get next renew operation
             operation = None
             with self.lock:
-                if self.user_renew_queues[email]:
-                    operation = self.user_renew_queues[email].popleft()
+                if self.global_renew_queue:
+                    operation = self.global_renew_queue.popleft()
                 else:
                     # No more renew operations, mark as inactive
-                    self.user_status[email]['renew_active'] = False
+                    self.status['renew_active'] = False
                     break
 
             if operation:
+                email = operation['email']
+
                 # Update status
-                self.user_status[email]['current_renew_operation'] = 'Renewing'
-                self.user_status[email]['last_activity'] = timezone.now()
+                self.status['current_renew_operation'] = f'Renewing for {email}'
+                self.status['last_activity'] = timezone.now()
 
                 print(f"\n▶️ Processing RENEW for {email}")
                 print(
-                    f"   Remaining RENEW operations: {len(self.user_renew_queues[email])}")
+                    f"   Remaining RENEW operations: {len(self.global_renew_queue)}")
 
                 # Process the renewing operation
                 try:
@@ -271,7 +260,7 @@ class SequentialBrowserManager:
 
                     # Update completed count
                     with self.lock:
-                        self.user_status[email]['renews_completed'] += 1
+                        self.status['renews_completed'] += 1
 
                     print(f"✅ Completed RENEW operation for {email}")
 
@@ -281,14 +270,13 @@ class SequentialBrowserManager:
                         f"Renew operation failed for {email}: {str(e)}")
 
                 # Clear current operation status
-                self.user_status[email]['current_renew_operation'] = None
+                self.status['current_renew_operation'] = None
 
                 # Small delay between operations
                 time.sleep(1)
 
-        print(f"🏁 RENEW processor finished for: {email}")
-        print(
-            f"   Total renews completed: {self.user_status[email]['renews_completed']}")
+        print(f"🏁 GLOBAL RENEW processor finished")
+        print(f"   Total renews completed: {self.status['renews_completed']}")
 
     def _execute_posting(self, operation):
         """
@@ -332,76 +320,59 @@ class SequentialBrowserManager:
 
         return result
 
-    def _cleanup_post_processor(self, email):
-        """
-        Clean up post processor when done
-
-        Args:
-            email: User email to cleanup
-        """
+    def _cleanup_post_processor(self):
+        """Clean up post processor when done"""
         with self.lock:
-            if email in self.user_post_processors:
-                self.user_post_processors[email].shutdown(wait=False)
-                del self.user_post_processors[email]
+            if self.post_processor:
+                self.post_processor.shutdown(wait=False)
+                self.post_processor = None
 
-            self.user_status[email]['post_active'] = False
-            self.user_status[email]['current_post_operation'] = None
+            self.status['post_active'] = False
+            self.status['current_post_operation'] = None
 
-    def _cleanup_renew_processor(self, email):
-        """
-        Clean up renew processor when done
-
-        Args:
-            email: User email to cleanup
-        """
+    def _cleanup_renew_processor(self):
+        """Clean up renew processor when done"""
         with self.lock:
-            if email in self.user_renew_processors:
-                self.user_renew_processors[email].shutdown(wait=False)
-                del self.user_renew_processors[email]
+            if self.renew_processor:
+                self.renew_processor.shutdown(wait=False)
+                self.renew_processor = None
 
-            self.user_status[email]['renew_active'] = False
-            self.user_status[email]['current_renew_operation'] = None
+            self.status['renew_active'] = False
+            self.status['current_renew_operation'] = None
 
     def get_user_status(self, email):
         """
-        Get current status for a user
+        Get current status for a specific user
 
         Args:
             email: User email
 
         Returns:
-            dict: Status information
+            dict: Status information for this user
         """
+        # Return global status (applies to all users now)
         with self.lock:
-            status = self.user_status[email].copy()
-            status['post_queue_size'] = len(self.user_post_queues[email])
-            status['renew_queue_size'] = len(self.user_renew_queues[email])
-            status['total_queue_size'] = status['post_queue_size'] + \
-                status['renew_queue_size']
-            return status
+            return {
+                **self.status,
+                'post_queue_size': len(self.global_post_queue),
+                'renew_queue_size': len(self.global_renew_queue),
+                'total_queue_size': len(self.global_post_queue) + len(self.global_renew_queue),
+            }
 
     def get_all_users_status(self):
         """
-        Get status for all users
+        Get global status (all users share same queues)
 
         Returns:
-            dict: All users' status information
+            dict: Global status information
         """
         with self.lock:
-            all_status = {}
-            all_emails = set(
-                list(self.user_status.keys()) +
-                list(self.user_post_queues.keys()) +
-                list(self.user_renew_queues.keys())
-            )
-            for email in all_emails:
-                status = self.user_status[email].copy()
-                status['post_queue_size'] = len(self.user_post_queues[email])
-                status['renew_queue_size'] = len(self.user_renew_queues[email])
-                status['total_queue_size'] = status['post_queue_size'] + \
-                    status['renew_queue_size']
-                all_status[email] = status
-            return all_status
+            return {
+                **self.status,
+                'post_queue_size': len(self.global_post_queue),
+                'renew_queue_size': len(self.global_renew_queue),
+                'total_queue_size': len(self.global_post_queue) + len(self.global_renew_queue),
+            }
 
     def shutdown(self):
         """
@@ -410,12 +381,12 @@ class SequentialBrowserManager:
         print("🛑 Shutting down Sequential Browser Manager...")
 
         with self.lock:
-            for email, executor in self.user_post_processors.items():
-                executor.shutdown(wait=False)
-            for email, executor in self.user_renew_processors.items():
-                executor.shutdown(wait=False)
-            self.user_post_processors.clear()
-            self.user_renew_processors.clear()
+            if self.post_processor:
+                self.post_processor.shutdown(wait=False)
+            if self.renew_processor:
+                self.renew_processor.shutdown(wait=False)
+            self.post_processor = None
+            self.renew_processor = None
 
         print("✅ Sequential Browser Manager shutdown complete")
 

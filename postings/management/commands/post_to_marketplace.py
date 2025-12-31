@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from postings.models import MarketplacePost, PostingJob, ErrorLog
-from automation.sequential_browser_manager import post_to_marketplace_sequential
+from automation.post_to_facebook import login_and_post
 from django.utils import timezone
 from django.db.models import QuerySet, Manager
 from django.core.files.base import ContentFile
@@ -142,16 +142,14 @@ class Command(BaseCommand):
                     image_path = os.path.abspath(post.image.path)
                     print(f"      Image: {image_path}")
 
-                    # ✅ ADD TO SEQUENTIAL QUEUE (will process one-by-one per user)
-                    result = post_to_marketplace_sequential(
+                    # Post to Facebook (direct call with job tracking)
+                    login_and_post(
                         email=post.account.email,
                         title=post.title,
                         description=post.description,
-                        price=str(post.price),
+                        price=float(post.price),
                         image_path=image_path
                     )
-                    print(
-                        f"      📋 Queued: {result['status']} - {result['message']}")
 
                     # Mark as posted
                     post.posted = True

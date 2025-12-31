@@ -383,7 +383,7 @@ def auto_login_and_save_session(email, password):
 
 
 # def login_and_post(email, title, description, price, image_path, location):
-def login_and_post(email, title, description, price, image_path, headless=True):
+def login_and_post(email, title, description, price, image_path, headless=False):
     """
     Post to Facebook Marketplace
 
@@ -778,7 +778,6 @@ def login_and_post(email, title, description, price, image_path, headless=True):
         finally:
             context.close()
             browser.close()
-
 
 
 # from playwright.sync_api import sync_playwright
