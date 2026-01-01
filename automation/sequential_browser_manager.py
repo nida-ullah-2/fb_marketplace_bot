@@ -295,7 +295,7 @@ class SequentialBrowserManager:
             description=data['description'],
             price=data['price'],
             image_path=data['image_path'],
-            headless=False  # Change to True for production
+            # headless=False  # Change to True for production
         )
 
         return result
@@ -315,7 +315,7 @@ class SequentialBrowserManager:
         result = renew_listings(
             email=email,
             renewal_count=data['renewal_count'],
-            headless=False  # Change to True for production
+            # headless=False  # Change to True for production
         )
 
         return result
