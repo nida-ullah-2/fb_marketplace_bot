@@ -142,7 +142,7 @@ class Command(BaseCommand):
                     image_path = os.path.abspath(post.image.path)
                     print(f"      Image: {image_path}")
 
-                    # Post to Facebook
+                    # Post to Facebook (direct call with job tracking)
                     login_and_post(
                         email=post.account.email,
                         title=post.title,

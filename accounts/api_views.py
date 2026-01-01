@@ -6,16 +6,31 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.conf import settings
 from django.core.cache import cache
-from .serializers import UserSerializer, RegisterSerializer, FacebookAccountSerializer
-from .models import CustomUser, FacebookAccount
-from postings.models import MarketplacePost
-from automation.post_to_facebook import save_session, manual_login_and_save_session
-from automation.renew_posts import renew_listings as renew_listings_automation
-from automation.session_converter import auto_convert_session, is_browser_format
 from threading import Thread
+# from .serializers import UserSerializer, RegisterSerializer, FacebookAccountSerializer
+# from .models import CustomUser, FacebookAccount
+# from postings.models import MarketplacePost
+# from automation.post_to_facebook import save_session, manual_login_and_save_session
+# from automation.renew_posts import renew_listings as renew_listings_automation
+# from automation.session_converter import auto_convert_session, is_browser_format
 import os
 import re
 import json
+
+# Automation imports
+from automation.post_to_facebook import save_session, manual_login_and_save_session
+from automation.session_converter import auto_convert_session, is_browser_format
+from automation.sequential_browser_manager import (
+    post_to_marketplace_sequential,
+    renew_listings_sequential,
+    get_user_automation_status,
+    get_all_automation_status
+)
+
+# Local imports
+from .serializers import UserSerializer, RegisterSerializer, FacebookAccountSerializer
+from .models import CustomUser, FacebookAccount
+from postings.models import MarketplacePost
 
 
 def validate_password_strength(password):
@@ -947,11 +962,10 @@ def renew_listings(request):
     results = []
 
     for account in accounts:
-        # Call the automation function just like posting does
-        result = renew_listings_automation(
+        # ✅ USE SEQUENTIAL QUEUE SYSTEM for proper browser management
+        result = renew_listings_sequential(
             email=account.email,
-            renewal_count=renewal_count,
-            headless=True  # Running in headless mode for better performance
+            renewal_count=renewal_count
         )
 
         # Add account info to result

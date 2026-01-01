@@ -34,7 +34,7 @@ def debug_page_state(page, step_name):
     print()
 
 
-def renew_listings(email, renewal_count=20, headless=False):
+def renew_listings(email, renewal_count=20, headless=True):
     """
     Renew marketplace listings for a Facebook account
 
@@ -67,7 +67,7 @@ def renew_listings(email, renewal_count=20, headless=False):
     with sync_playwright() as p:
         # Use settings value if headless parameter not explicitly provided
         use_headless = headless if headless is not None else getattr(
-            settings, 'AUTOMATION_HEADLESS_MODE', False)
+            settings, 'AUTOMATION_HEADLESS_MODE', True)
 
         if use_headless:
             print("🤖 Running in HEADLESS mode")
