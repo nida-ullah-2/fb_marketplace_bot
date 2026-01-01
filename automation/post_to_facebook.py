@@ -383,7 +383,7 @@ def auto_login_and_save_session(email, password):
 
 
 # def login_and_post(email, title, description, price, image_path, location):
-def login_and_post(email, title, description, price, image_path, headless=False):
+def login_and_post(email, title, description, price, image_path, headless=True):
     """
     Post to Facebook Marketplace
 
